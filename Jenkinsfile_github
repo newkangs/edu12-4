@@ -5,6 +5,8 @@ def imageName = "ghcr.io/shclub/edu12-backend"
 def fromImage = "ghcr.io/shclub/jre17-runtime:v1.0.0"
 def git_ops_name = "edu12-backend-gitops"
 def P_NAMESPACE = "edu1"
+def P_SLAVE_PVC = "jenkins-edu1-slave-pvc"
+def P_EMAIL = "shkang9696@gmail.com"
 
 def TAG = getTag(gitBranch)
 
