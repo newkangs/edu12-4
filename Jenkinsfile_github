@@ -4,7 +4,7 @@ def docker_registry = "ghcr.io"
 def imageName = "ghcr.io/shclub/edu12-backend"
 def fromImage = "ghcr.io/shclub/jre17-runtime:v1.0.0"
 def git_ops_name = "edu12-backend-gitops"
-def P_NAMESPACE = "edu30"
+def P_NAMESPACE = "edu1"
 
 def TAG = getTag(gitBranch)
 
@@ -15,7 +15,7 @@ podTemplate(label: label, serviceAccount: 'jenkins-admin', namespace: P_NAMESPAC
     ],
     volumes: [
         hostPathVolume(hostPath: '/etc/containers' , mountPath: '/var/lib/containers' ),
-        persistentVolumeClaim(mountPath: '/var/jenkins_home', claimName: 'jenkins-edu-slave-pvc',readOnly: false)
+        persistentVolumeClaim(mountPath: '/var/jenkins_home', claimName: 'jenkins-edu1-slave-pvc',readOnly: false)
         ]){    
   
   //node("podman-agent") {
@@ -24,7 +24,7 @@ podTemplate(label: label, serviceAccount: 'jenkins-admin', namespace: P_NAMESPAC
        stage('Clone Git Project') {
             sh "pwd"
             echo 'Clone'
-            git branch: 'master', credentialsId: 'github_ci', url: 'https://github.com/shclub/edu12-4.git'
+            git branch: 'master', credentialsId: 'github_ci_edu1', url: 'https://github.com/newkangs/edu12-4.git'
             sh "ls"
         }
   //./mvnw clean package jib:build  -Dmaven.test.skip=true  \
@@ -33,7 +33,7 @@ podTemplate(label: label, serviceAccount: 'jenkins-admin', namespace: P_NAMESPAC
                      
       stage('Maven Build & Image Push ') {
             container('build-tools') {
-               withCredentials([usernamePassword(credentialsId: 'github_ci',usernameVariable: 'USERNAME',passwordVariable: 'PASSWORD')]) {
+               withCredentials([usernamePassword(credentialsId: 'github_ci_edu1',usernameVariable: 'USERNAME',passwordVariable: 'PASSWORD')]) {
                     sh  """
                          ./mvnw clean package jib:build  -Dmaven.test.skip=true  \
                          -Djib.from.image=${fromImage} \
@@ -51,14 +51,14 @@ podTemplate(label: label, serviceAccount: 'jenkins-admin', namespace: P_NAMESPAC
 
         stage('GitOps update') {
             container('build-tools') {
-               withCredentials([usernamePassword(credentialsId: 'github_ci',usernameVariable: 'USERNAME',passwordVariable: 'PASSWORD')]) {
+               withCredentials([usernamePassword(credentialsId: 'github_ci_edu1',usernameVariable: 'USERNAME',passwordVariable: 'PASSWORD')]) {
                     sh """  
                         cd ~
                         git clone https://${USERNAME}:${PASSWORD}@github.com/${USERNAME}/${git_ops_name}
                         cd ${git_ops_name}
                         git checkout HEAD
                         kustomize edit set image ${imageName}:${TAG}
-                        git config --global user.email "shclub@gmail.com"
+                        git config --global user.email "shkang9696@gmail.com"
                         git config --global user.name ${USERNAME}
                         git add .
                         git commit -am 'update image tag  ${TAG} from My_Jenkins'
